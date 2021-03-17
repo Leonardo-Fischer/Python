@@ -1,22 +1,10 @@
 import random #to use randint()
 import time #to use sleep()
 
-class Dealer(object):
-    
-    #Atributes 
-    def __init__(self, cards=[], score=0, bet=0):
-        self.cards = cards
-        self.score = score
-        self.bet = bet
-
-    #Method that will receive the first two cards
-    def get_cards(self, card):
-        self.cards.append(card)
-
 class Player(object):
 
     #Atributes 
-    def __init__(self, cards=['A'], score=0, bet=0):
+    def __init__(self, cards=[], score=0, bet=0):
         self.cards = cards
         self.score = score
         self.bet = bet
@@ -64,7 +52,7 @@ print("*********************************************************************")
 while playing:
 
     player = Player()
-    dealer = Dealer()
+    dealer = Player()
 
     #Asking bet from the user
     player.bet = int(input("\nHow many chips do you wanna bet? ")) #Insert try and execpt here, to accept only integers
@@ -73,26 +61,34 @@ while playing:
     time.sleep(2)
 
     #Randomizing the cards
-    #player.get_cards(cards_given[random.randint(0,12)])
-    #plater.cards[0] = 'A'
+    player.get_cards(cards_given[random.randint(0,12)])
     print("\nPlayer first card: ", player.cards[0])
     player.get_cards(cards_given[random.randint(0,12)])
     print("Player second card: ", player.cards[1])
-
-
-    #Adding the cards total score
-    for i in range(0, len(player.cards)):
-        player.score_cards(cards_values[player.cards[i]])
-    print("\nPlayer's score: ", player.score)
-
-    #if player.score > 21 and player has an 'A':
-        # consider A  as 1
     
     #Dealer cards
     dealer.get_cards(cards_given[random.randint(0,12)])
     print("\nDealer first card: ", dealer.cards[0])
     dealer.get_cards(cards_given[random.randint(0,12)])
     print("Dealer second card: will be revealed by the end of the game ")
+
+    #---------------------------#
+
+    #Adding the player's total score
+    for i in range(0, len(player.cards)):
+        player.score_cards(cards_values[player.cards[i]])
+    print("\nPlayer's score: ", player.score)
+
+
+    #if player.score > 21 and player has an 'A':
+        # consider A  as 1
+
+    if player.score == 21:
+        stand()
+    else:
+        continue
+    
+    
     
 
     #Asking the player what he/she wants to do
