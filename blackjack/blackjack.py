@@ -4,25 +4,31 @@ import time #to use sleep()
 class Player(object):
 
     #Atributes 
-    def __init__(self, cards=[], score=0, bet=0):
-        self.cards = cards
-        self.score = score
-        self.bet = bet
+    def __init__(self):
+        self.cards = []
+        self.score = 0
+        self.bet = 0
 
     #Method that will receive the first two cards
     def get_cards(self, card):
         self.cards.append(card)
 
-    #Method that will count the score
-    def score_cards(self, value):
-        if type(value) == tuple:
-            value = 11
-            self.score += value
-        else:
-            self.score += value
+#Method that calculates the score
+def score_cards(score, value):
+    if type(value) == tuple:
+        value = 11
+        score += value
+    else:
+        score += value
+    return score
     
 
-def stand():
+def stand(u_score, u_bet, d_score, d_cards, blackjack):
+    while d_score <= 16:
+        d_cards.append((cards_given[random.randint(0,12)]))
+        d_score = score_cards(d_score, cards_values[d_cards[-1]])
+    calculate_amount(u_score, u_bet, d_score, blackjack)
+
     pass
 
 def hit():
@@ -34,8 +40,36 @@ def double():
 def leave():
     pass
 
+def calculate_amount(u, bet, d, blackjack):
+
+    print("\nDealer's score: %i\n" %d)
+
+    if u == d:
+        print("It is a Tie!")
+        print("Your final amount is %i chips" %(bet))
+    elif blackjack:
+        print("You've got a Blackjack!!!")
+        #The math is 3/2
+        bet += (3/2) * bet
+        print("Your final amount is %i chips" %(bet))
+    elif (u > d and u < 21) or (u < 21 and d > 21):
+        print("You won but it's not a Blackjack")
+        #The math is 1/1
+        bet += bet
+        print("Your final amount is %i chips" %(bet))
+    else:
+        print("You lose!")
+        bet = 0
+        print("Your final amount is %i chips" %(bet))
+    pass
+
 global cards_values, cards_given
 playing = True
+
+#Counter of A's
+counter_As = 0
+#Sequence os A's that could occur
+As_row = ['first', 'second', 'third', 'fourth']
 
 
 cards_values = {'A': (1, 11), '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 10, 'Q': 10, 'K':10}
@@ -51,20 +85,20 @@ print("*********************************************************************")
 
 while playing:
 
-    player = Player()
+    user = Player()
     dealer = Player()
 
     #Asking bet from the user
-    player.bet = int(input("\nHow many chips do you wanna bet? ")) #Insert try and execpt here, to accept only integers
+    user.bet = int(input("\nHow many chips do you wanna bet? ")) #Insert try and execpt here, to accept only integers
 
     print("\nDealer is giving the cards... ")
     time.sleep(2)
 
     #Randomizing the cards
-    player.get_cards(cards_given[random.randint(0,12)])
-    print("\nPlayer first card: ", player.cards[0])
-    player.get_cards(cards_given[random.randint(0,12)])
-    print("Player second card: ", player.cards[1])
+    user.get_cards(cards_given[random.randint(0,12)])
+    print("\nPlayer first card: ", user.cards[0])
+    user.get_cards(cards_given[random.randint(0,12)])
+    print("Player second card: ", user.cards[1])
     
     #Dealer cards
     dealer.get_cards(cards_given[random.randint(0,12)])
@@ -75,31 +109,35 @@ while playing:
     #---------------------------#
 
     #Adding the player's total score
-    for i in range(0, len(player.cards)):
-        player.score_cards(cards_values[player.cards[i]])
-    print("\nPlayer's score: ", player.score)
+    for i in range(0, len(user.cards)):
+        user.score = score_cards(user.score, cards_values[user.cards[i]])
+        if user.cards[i] == 'A':
+            counter_As += 1
+    #To handle the cases when user.score > 21 and player has one or more A's
+    while user.score > 21 and counter_As > 0:
+        print("\nYou've scored more than 21, your %s A is now equal to 1 point" %(As_row[counter_As-1]))
+        user.score -= 10
+        counter_As -= 1
+    print("\nPlayer's score: ", user.score)
 
-
-    #if player.score > 21 and player has an 'A':
-        # consider A  as 1
-
-    if player.score == 21:
-        stand()
+    #Adding the dealer's total score
+    for i in range(0, len(dealer.cards)):
+        dealer.score = score_cards(dealer.score, cards_values[dealer.cards[i]])
+    
+    #In case of a blackjack!
+    if user.score == 21:
+        stand(user.score, user.bet, dealer.score, dealer.cards, True)
     else:
-        continue
+        pass
     
-    
-    
-
     #Asking the player what he/she wants to do
-    print("\nWhat will you do? ")
+    print("\nWhat you are gonna do?")
     move = input("1)Stand\n2)Hit\n3)Double\n4)Leave\nMove: ") #COLOCAR TRAVA PARA NÃO ACEITAR OUTROS NUMEROS/CARACTERES 
     move = int(move)
     
+    #Stand
     if move == 1:
-        stand()
-
-    print("Passou")
+        stand(user.score, user.bet, dealer.score, dealer.cards, False)
     """
     double = input("\nDo you wanna double the bet? (y/n) ")
 
