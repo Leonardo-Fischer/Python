@@ -23,13 +23,10 @@ def score_cards(score, value):
     return score
     
 
-def stand(u_score, u_bet, d_score, d_cards, blackjack):
+def dealer_plays(d_score, d_cards):
     while d_score <= 16:
         d_cards.append((cards_given[random.randint(0,12)]))
         d_score = score_cards(d_score, cards_values[d_cards[-1]])
-    calculate_amount(u_score, u_bet, d_score, blackjack)
-
-    pass
 
 def hit():
     pass
@@ -61,7 +58,6 @@ def calculate_amount(u, bet, d, blackjack):
         print("You lose!")
         bet = 0
         print("Your final amount is %i chips" %(bet))
-    pass
 
 global cards_values, cards_given
 playing = True
@@ -126,21 +122,36 @@ while playing:
     
     #In case of a blackjack!
     if user.score == 21:
-        stand(user.score, user.bet, dealer.score, dealer.cards, True)
+        dealer_plays(dealer.score, dealer.cards)
+        calculate_amount(user.score, user.bet, dealer.score, True)
+    #In case the user points exceeds 21
+    elif user.score > 21:
+        calculate_amount(user.score, user.bet, dealer.score, True)
     else:
         pass
     
     #Asking the player what he/she wants to do
     print("\nWhat you are gonna do?")
-    move = input("1)Stand\n2)Hit\n3)Double\n4)Leave\nMove: ") #COLOCAR TRAVA PARA NÃO ACEITAR OUTROS NUMEROS/CARACTERES 
+    move = '0' #Initializing the variable so the while can work
+    while move != '1' and move != '2' and move != '3' and move != '4':
+        move = input("1)Stand\n2)Hit\n3)Double\n4)Leave\nMove: ")
     move = int(move)
     
     #Stand
     if move == 1:
-        stand(user.score, user.bet, dealer.score, dealer.cards, False)
+        dealer_plays(dealer.score, dealer.cards)
+        calculate_amount(user.score, user.bet, dealer.score, False)
+    #Hit
+    elif move == 2:
+        user.get_cards(cards_given[random.randint(0,12)])
+    else:
+        pass
+
+
+
+
     """
     double = input("\nDo you wanna double the bet? (y/n) ")
-
     
     if (double == 'y') or (double =='Y'):
         bet = bet * 2
@@ -157,7 +168,6 @@ while playing:
     """
 #Stand -> não pedir mais cartas
 #Hit -> pedir mais cartas
-#Split -> dividir
 #Double -> dobra a aposta mas só ganha mais uma carta
 
 
