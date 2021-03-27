@@ -1,6 +1,8 @@
 import random #to use randint()
 import time #to use sleep()
 
+#---------------Class---------------#
+
 class Player(object):
 
     #Atributes 
@@ -13,6 +15,8 @@ class Player(object):
     def get_cards(self, card):
         self.cards.append(card)
 
+#--------------Methods--------------#
+
 #Method that calculates the score
 def score_cards(score, value):
     if type(value) == tuple:
@@ -21,25 +25,22 @@ def score_cards(score, value):
     else:
         score += value
     return score
-    
+
 
 def dealer_plays(d_score, d_cards):
     while d_score <= 16:
         d_cards.append((cards_given[random.randint(0,12)]))
         d_score = score_cards(d_score, cards_values[d_cards[-1]])
+    return d_score
 
-def hit():
-    pass
 
-def double():
-    pass
+def calculate_amount(u, bet, d, d_cards, blackjack):
 
-def leave():
-    pass
-
-def calculate_amount(u, bet, d, blackjack):
-
-    print("\nDealer's score: %i\n" %d)
+    print("\n*************************")
+    print("Dealer's second card: ", d_cards[1])
+    print("\nDealer's final score: ", d)
+    print("\nYour final score: ", u)
+    print("*************************\n")
 
     if u == d:
         print("It is a Tie!")
@@ -58,6 +59,16 @@ def calculate_amount(u, bet, d, blackjack):
         print("You lose!")
         bet = 0
         print("Your final amount is %i chips" %(bet))
+
+    play_again = '0'
+    while play_again != 'y' and play_again != 'Y' and play_again != 'n' and play_again!= 'N':
+        play_again = input("\nDo you wanna play again? (y/n) ")
+    if play_again == 'y' or play_again == 'Y':
+        return True
+    else:
+        return False
+
+#----------------Main---------------#
 
 global cards_values, cards_given
 playing = True
@@ -81,6 +92,10 @@ print("*********************************************************************")
 
 while playing:
 
+    continuing_round = True #Variable to control the flow of one game
+    double = False #Variable to check if one Double has happened
+    times = 0 #Variable to count how many times the player asked for a card
+
     user = Player()
     dealer = Player()
 
@@ -92,84 +107,82 @@ while playing:
 
     #Randomizing the cards
     user.get_cards(cards_given[random.randint(0,12)])
-    print("\nPlayer first card: ", user.cards[0])
+    print("\nYour first card: ", user.cards[0])
     user.get_cards(cards_given[random.randint(0,12)])
-    print("Player second card: ", user.cards[1])
+    print("Your second card: ", user.cards[1])
     
     #Dealer cards
     dealer.get_cards(cards_given[random.randint(0,12)])
-    print("\nDealer first card: ", dealer.cards[0])
+    print("\nDealer's first card: ", dealer.cards[0])
     dealer.get_cards(cards_given[random.randint(0,12)])
-    print("Dealer second card: will be revealed by the end of the game ")
-
-    #---------------------------#
-
-    #Adding the player's total score
-    for i in range(0, len(user.cards)):
-        user.score = score_cards(user.score, cards_values[user.cards[i]])
-        if user.cards[i] == 'A':
-            counter_As += 1
-    #To handle the cases when user.score > 21 and player has one or more A's
-    while user.score > 21 and counter_As > 0:
-        print("\nYou've scored more than 21, your %s A is now equal to 1 point" %(As_row[counter_As-1]))
-        user.score -= 10
-        counter_As -= 1
-    print("\nPlayer's score: ", user.score)
-
-    #Adding the dealer's total score
-    for i in range(0, len(dealer.cards)):
-        dealer.score = score_cards(dealer.score, cards_values[dealer.cards[i]])
-    
-    #In case of a blackjack!
-    if user.score == 21:
-        dealer_plays(dealer.score, dealer.cards)
-        calculate_amount(user.score, user.bet, dealer.score, True)
-    #In case the user points exceeds 21
-    elif user.score > 21:
-        calculate_amount(user.score, user.bet, dealer.score, True)
-    else:
-        pass
-    
-    #Asking the player what he/she wants to do
-    print("\nWhat you are gonna do?")
-    move = '0' #Initializing the variable so the while can work
-    while move != '1' and move != '2' and move != '3' and move != '4':
-        move = input("1)Stand\n2)Hit\n3)Double\n4)Leave\nMove: ")
-    move = int(move)
-    
-    #Stand
-    if move == 1:
-        dealer_plays(dealer.score, dealer.cards)
-        calculate_amount(user.score, user.bet, dealer.score, False)
-    #Hit
-    elif move == 2:
-        user.get_cards(cards_given[random.randint(0,12)])
-    else:
-        pass
+    print("Dealer's second card: will be revealed by the end of the game ")
 
 
+    while continuing_round:
 
+        #The scores are reseted every time to avoid repeated sums
+        user.score = 0
+        dealer.score = 0
 
-    """
-    double = input("\nDo you wanna double the bet? (y/n) ")
-    
-    if (double == 'y') or (double =='Y'):
-        bet = bet * 2
-    else:
-    #Asking the player it he/she wants to quit
-        leave = input("\nDo you wanna quit this round? (y/n) " )
-        if (leave == 'y') or (leave == 'Y'):
-            print("\nYou got back %1.0f chips" %(bet/2))
-            #print total score
+        #Adding the player's total score
+        for i in range(0, len(user.cards)):
+            user.score = score_cards(user.score, cards_values[user.cards[i]])
+            if user.cards[i] == 'A':
+                counter_As += 1
+        #To handle the cases when user.score > 21 and player has one or more A's
+        while user.score > 21 and counter_As > 0:
+            print("\nYou've scored more than 21, your %s A is now equal to 1 point" %(As_row[counter_As-1]))
+            user.score -= 10
+            counter_As -= 1
+        print("\nYour score: ", user.score)
+
+        #Adding the dealer's total score
+        for i in range(0, len(dealer.cards)):
+            dealer.score = score_cards(dealer.score, cards_values[dealer.cards[i]])
+        
+
+        #In case of a blackjack!
+        if user.score == 21 and times == 0:
+            playing = calculate_amount(user.score, user.bet, dealer.score, dealer.cards, True)
+            continuing_round = False
+            break
+        #In case the user points exceeds 21 or in case of a Double move
+        elif user.score > 21 or double:
+            dealer.score = dealer_plays(dealer.score, dealer.cards)
+            playing = calculate_amount(user.score, user.bet, dealer.score, dealer.cards, False)
+            continuing_round = False
             break
         else:
-            continue
-    
-    """
-#Stand -> não pedir mais cartas
-#Hit -> pedir mais cartas
-#Double -> dobra a aposta mas só ganha mais uma carta
-
-
-#print(cards_values['A'][0]) Catch 1
-
+            pass
+        
+        #Asking the player what he/she wants to do
+        print("\nWhat you are gonna do?")
+        move = '0' #Initializing the variable so the while can work
+        while move != '1' and move != '2' and move != '3' and move != '4':
+            move = input("1)Stand\n2)Hit\n3)Double\n4)Leave\nMove: ")
+        move = int(move)
+        
+        #Stand
+        if move == 1:
+            dealer.score = dealer_plays(dealer.score, dealer.cards)
+            playing = calculate_amount(user.score, user.bet, dealer.score, dealer.cards, False)
+            continuing_round = False
+        #Hit
+        elif move == 2:
+            user.get_cards(cards_given[random.randint(0,12)])
+            print("\nYour new card is: ", user.cards[-1])
+        #Double
+        elif move == 3:
+            user.bet += user.bet
+            user.get_cards(cards_given[random.randint(0,12)])
+            print("\nYour new card is: ", user.cards[-1])
+            double = True
+        #Leave
+        elif move == 4:
+            continuing_round = False
+            playing = False
+        else:
+            pass
+        
+        #Increments the times counter
+        times += 1
